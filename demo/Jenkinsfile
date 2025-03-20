@@ -1,88 +1,90 @@
 pipeline {
     agent any
 
+    environment {
+        DIRECTORY_PATH = 'C:/Users/DELL/Desktop/sem4/sit223'
+        TESTING_ENVIRONMENT = 'staging'
+        PRODUCTION_ENVIRONMENT = 'Seerat'
+    } 
+    
     stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/seerat-00/Demo-pipeline.git'
+            }
+        } 
+        
         stage('Build') {
             steps {
-                echo 'This stage compiles and packages the application using a build automation tool like Maven or Gradle.'
-                echo 'For Java projects, Maven (mvn clean package) can be used.'
-                echo 'For JavaScript projects, npm or yarn can handle the build process.'
-                echo 'hello man'
-            }
-        }
-
-        stage('Unit and Integration Tests') {
-            steps {
                 script {
-                    try {
-                        echo 'This stage runs unit and integration tests to verify code correctness.'
-                        echo 'JUnit or TestNG is commonly used for Java applications.'
-                        echo 'Jest or Mocha can be used for JavaScript-based projects.'
-                        echo 'Running tests...'
-
-                        // Simulate test execution
-                        sh 'echo "Running tests..."'
-
-                        echo 'Tests passed successfully.'
-                        
-                        // Send email on success
-                        emailext subject: "Jenkins Pipeline: Tests Passed",
-                            body: "All unit and integration tests passed successfully.",
-                            recipientProviders: [[$class: 'DevelopersRecipientProvider']]
-                    } catch (Exception e) {
-                        echo 'Tests failed! Sending failure email...'
-                        
-                        // Send email on failure
-                        emailext subject: "Jenkins Pipeline: Tests Failed",
-                            body: "Unit and integration tests failed. Please check the logs.",
-                            recipientProviders: [[$class: 'iseeratsharmash@gmail.com']]
-                        
-                        error "Failing the build due to test failure."
-                    }
+                    echo "Fetch the source code from the directory path: ${DIRECTORY_PATH}"
+                    echo "Compiling the code and generating artifacts..."
                 }
             }
         }
 
-        stage('Code Analysis') {
+        stage('Test') {
             steps {
-                echo 'This stage integrates a code analysis tool to check code quality and industry standards.'
-                echo 'SonarQube or Checkstyle can be used for static code analysis.'
+                script {
+                    echo "Running Unit Tests..."
+                    echo "Running Integration Tests..."
+                }
             }
         }
 
-        stage('Security Scan') {
+        stage('Code Quality Check') {
             steps {
-                echo 'This stage performs a security scan to identify vulnerabilities in the code or dependencies.'
-                echo 'OWASP Dependency-Check or Snyk can be used for scanning security issues.'
+                script {
+                    echo "Checking code quality..."
+                }
             }
         }
 
-        stage('Deploy to Staging') {
+        stage('Deploy') {
             steps {
-                echo 'This stage deploys the application to a staging environment, such as an AWS EC2 instance.'
-                echo 'Deployment tools like SCP, Ansible, or Docker can be used.'
+                script {
+                    echo "Deploying the application to the testing environment: ${TESTING_ENVIRONMENT}"
+                }
             }
         }
 
-        stage('Integration Tests on Staging') {
+        stage('Approval') {
             steps {
-                echo 'This stage executes integration tests in a staging environment to simulate production conditions.'
-                echo 'API testing tools like Postman or cURL can be used to verify functionality.'
+                script {
+                    echo "Waiting for manual approval..."
+                    sleep 10
+                }
             }
         }
 
         stage('Deploy to Production') {
             steps {
-                echo 'This stage deploys the final, tested application to a production environment, such as an AWS EC2 instance.'
-                echo 'Deployment strategies may include blue-green deployment or rolling updates.'
+                script {
+                    echo "Deploying the application to the production environment: ${PRODUCTION_ENVIRONMENT}"
+                }
             }
         }
     }
 
     post {
         always {
-            echo 'This section can be used to send an email notification about pipeline execution status.'
-            echo 'Jenkins Email Extension Plugin can be used to notify developers about success or failure.'
+            script {
+                def buildStatus = currentBuild.currentResult
+                def buildUser = currentBuild.getBuildCauses().find { it.className == 'hudson.model.Cause$UserIdCause' }?.userId ?: 'GitHub User'
+
+                emailext(
+                    subject: "Pipeline ${buildStatus}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    body: """
+                        <p><b>Jenkins Pipeline Build Status:</b> ${buildStatus}</p>
+                        <p><b>Started by:</b> ${buildUser}</p>
+                        <p>Check details in Jenkins.</p>
+                    """,
+                    mimeType: 'text/html',
+                    to: 'iseeratsharmash@gmail.com',
+                    from: 'iseeratsharmash@gmail.com',
+                    replyTo: 'iseeratsharmash@gmail.com'
+                )
+            }
         }
     }
 }
