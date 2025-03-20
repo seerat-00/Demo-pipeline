@@ -2,66 +2,57 @@ pipeline {
     agent any
 
     environment {
-        EMAIL_RECIPIENTS = 'iseeratsharmash@gmail.com'
-    }
-
+        DIRECTORY_PATH = 'C:/Users/DELL/Desktop/sem4/sit223'
+        TESTING_ENVIRONMENT = 'staging'
+        PRODUCTION_ENVIRONMENT = 'Seerat'
+    } 
+    
     stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/seerat-00/Demo-pipeline.git'
+            }
+        } 
+        
         stage('Build') {
             steps {
                 script {
-                    echo 'Building the project... (mvn clean package)'
+                    echo "Fetch the source code from the directory path: ${DIRECTORY_PATH}"
+                    echo "Compile the code and generate any necessary artifacts"
                 }
             }
         }
 
-        stage('Unit and Integration Tests') {
+        stage('Test') {
             steps {
                 script {
-                    echo 'Running unit and integration tests... (mvn test)'
+                    echo "Unit tests"
+                    echo "Integration tests"
                 }
             }
         }
 
-        stage('Code Analysis') {
+        stage('Code Quality Check') {
             steps {
                 script {
-                    echo 'Running static code analysis... (mvn sonar:sonar)'
+                    echo "Check the quality of the code"
                 }
             }
         }
 
-        stage('Security Scan') {
+        stage('Deploy') {
             steps {
                 script {
-                    echo 'Running security scan... (mvn dependency-check:check)'
-                }
-            }
-            post {
-                always {
-                    script {
-                        emailext (
-                            subject: "Security Scan Results",
-                            to: "${EMAIL_RECIPIENTS}",
-                            body: "Security scan completed. Check logs for details.",
-                            attachLog: true
-                        )
-                    }
+                    echo "Deploy the application to the testing environment: ${TESTING_ENVIRONMENT}"
                 }
             }
         }
 
-        stage('Deploy to Staging') {
+        stage('Approval') {
             steps {
                 script {
-                    echo 'Deploying to staging... (scp target/*.jar user@staging-server:/app/)'
-                }
-            }
-        }
-
-        stage('Integration Tests on Staging') {
-            steps {
-                script {
-                    echo 'Running integration tests on staging... (curl -X GET http://staging-server/api/health)'
+                    echo "Waiting for manual approval..."
+                    sleep 10
                 }
             }
         }
@@ -69,22 +60,29 @@ pipeline {
         stage('Deploy to Production') {
             steps {
                 script {
-                    echo 'Deploying to production... (scp target/*.jar user@production-server:/app/)'
+                    echo "Deploying the application to the production environment: ${PRODUCTION_ENVIRONMENT}"
                 }
             }
         }
     }
 
-    post {
-        always {
-            script {
-                emailext (
-                    subject: "Pipeline Execution Report",
-                    to: "${EMAIL_RECIPIENTS}",
-                    body: "Pipeline execution completed. Check logs for details.",
-                    attachLog: true
-                )
-            }
+    post{
+    always {
+        script{
+            def buildStatus = currentBuild.currentResult
+            def buildUser = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]?.UserId ?: 'GItHub User'
+
+            emailext(
+                subject: "Pipeline ${buildStatus}:  ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+                <p>This is a jenkins Pipeline Build status.</p>
+                <p>It has run properly.</p>
+            """,
+            to: 'iseeratsharmash@gmail.com',
+            from: 'iseeratsharmash@gmail.com',
+            replyTo: 'iseeratsharmash@gmail.com'
+            )
+        }
         }
     }
 }
