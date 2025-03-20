@@ -93,8 +93,9 @@ pipeline {
                 emailext(
                     subject: "Pipeline ${buildStatus}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                     body: """
-                    <p>This is a Jenkins Pipeline Build status.</p>
-                    <p>The pipeline has executed successfully.</p>
+                    This is a Jenkins Pipeline Build status.
+                    It has run successfully.
+                    ThankYou.
                     """,
                     to: 'iseeratsharmash@gmail.com',
                     from: 'iseeratsharmash@gmail.com',
