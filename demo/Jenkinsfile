@@ -1,10 +1,9 @@
 pipeline {
     agent any
-
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/seerat-00/Demo-pipeline.git'
+                git branch: 'main', url: 'https://github.com/seerat-00/Demo-pipeline.git'
             }
         }
 
