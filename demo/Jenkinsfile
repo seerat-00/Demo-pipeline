@@ -1,5 +1,12 @@
 pipeline {
     agent any
+
+    environment {
+        DIRECTORY_PATH = 'C:/Users/DELL/Desktop/sem4/sit223'
+        TESTING_ENVIRONMENT = 'staging'
+        PRODUCTION_ENVIRONMENT = 'Seerat'
+    } 
+    
     stages {
         stage('Checkout') {
             steps {
