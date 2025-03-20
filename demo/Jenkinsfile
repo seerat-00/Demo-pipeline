@@ -1,73 +1,64 @@
 pipeline {
     agent any
 
-    triggers {
-        githubPush() // Automatically triggers the pipeline when code is pushed to GitHub
-    }
-
     stages {
-        
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/seerat-00/Demo-pipeline.git'
+            }
+        }
+
         stage('Build') {
             steps {
                 echo 'Building the application...'
-                sh 'mvn clean package' // Change based on your tech stack
+                bat 'echo Build process running...'  // Replace with actual build command
             }
         }
 
         stage('Unit and Integration Tests') {
             steps {
                 echo 'Running Unit and Integration Tests...'
-                sh 'mvn test' // Use Jest, TestNG, or PyTest based on the project
+                bat 'echo Running tests...'  // Replace with actual test command
             }
         }
 
         stage('Code Analysis') {
             steps {
-                echo 'Performing Code Quality Analysis...'
-                sh 'sonar-scanner -Dsonar.projectKey=my-app'
+                echo 'Performing Code Analysis...'
+                bat 'echo Code analysis in progress...'  // Replace with actual analysis command
             }
         }
 
         stage('Security Scan') {
             steps {
-                echo 'Running Security Scan...'
-                sh 'snyk test' // Replace with OWASP Dependency-Check if needed
+                echo 'Performing Security Scan...'
+                bat 'echo Running security scan...'  // Replace with actual security scan command
             }
         }
 
         stage('Deploy to Staging') {
             steps {
                 echo 'Deploying to Staging...'
-                sh '''
-                docker build -t my-app:latest .
-                docker run -d --name my-app-staging -p 8080:8080 my-app:latest
-                '''
+                bat 'echo Deploying to Staging environment...'  // Replace with actual deployment command
             }
         }
 
         stage('Integration Tests on Staging') {
             steps {
-                echo 'Running Integration Tests in Staging...'
-                sh 'curl -f http://localhost:8080/healthcheck' // Modify as needed
+                echo 'Running Integration Tests on Staging...'
+                bat 'echo Running staging tests...'  // Replace with actual test command
             }
         }
 
         stage('Deploy to Production') {
             steps {
                 echo 'Deploying to Production...'
-                input message: 'Proceed with deployment to production?', ok: 'Deploy'
-                sh '''
-                docker build -t my-app:latest .
-                docker run -d --name my-app-prod -p 8080:8080 my-app:latest
-                '''
+                bat 'echo Deploying to Production environment...'  // Replace with actual deployment command
             }
         }
     }
 
     post {
-        success {
-            echo 'Pipeline completed successfully!'
-        }
         failure {
             echo 'Pipeline failed. Check logs for errors.'
         }
