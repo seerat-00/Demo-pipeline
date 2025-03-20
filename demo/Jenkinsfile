@@ -65,4 +65,24 @@ pipeline {
             }
         }
     }
+
+    post{
+    always {
+        script{
+            def buildStatus = currentBuild.currentResult
+            def buildUser = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]?.UserId ?: 'GItHub User'
+
+            emailext(
+                subject: "Pipeline ${buildStatus}:  ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+                <p>This is a jenkins Pipeline Build status.</p>
+                <p>This was started by : ${buildUser}</p>
+            """,
+            to: 'iseeratsharmash@gmail.com',
+            from: 'iseeratsharmash@gmail.com',
+            replyTo: 'iseeratsharmash@gmail.com'
+            )
+        }
+        }
+    }
 }
