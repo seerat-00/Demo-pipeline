@@ -1,0 +1,75 @@
+pipeline {
+    agent any
+
+    triggers {
+        githubPush() // Automatically triggers the pipeline when code is pushed to GitHub
+    }
+
+    stages {
+        
+        stage('Build') {
+            steps {
+                echo 'Building the application...'
+                sh 'mvn clean package' // Change based on your tech stack
+            }
+        }
+
+        stage('Unit and Integration Tests') {
+            steps {
+                echo 'Running Unit and Integration Tests...'
+                sh 'mvn test' // Use Jest, TestNG, or PyTest based on the project
+            }
+        }
+
+        stage('Code Analysis') {
+            steps {
+                echo 'Performing Code Quality Analysis...'
+                sh 'sonar-scanner -Dsonar.projectKey=my-app'
+            }
+        }
+
+        stage('Security Scan') {
+            steps {
+                echo 'Running Security Scan...'
+                sh 'snyk test' // Replace with OWASP Dependency-Check if needed
+            }
+        }
+
+        stage('Deploy to Staging') {
+            steps {
+                echo 'Deploying to Staging...'
+                sh '''
+                docker build -t my-app:latest .
+                docker run -d --name my-app-staging -p 8080:8080 my-app:latest
+                '''
+            }
+        }
+
+        stage('Integration Tests on Staging') {
+            steps {
+                echo 'Running Integration Tests in Staging...'
+                sh 'curl -f http://localhost:8080/healthcheck' // Modify as needed
+            }
+        }
+
+        stage('Deploy to Production') {
+            steps {
+                echo 'Deploying to Production...'
+                input message: 'Proceed with deployment to production?', ok: 'Deploy'
+                sh '''
+                docker build -t my-app:latest .
+                docker run -d --name my-app-prod -p 8080:8080 my-app:latest
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Check logs for errors.'
+        }
+    }
+}
