@@ -18,7 +18,7 @@ pipeline {
             steps {
                 script {
                     echo "Fetch the source code from the directory path: ${DIRECTORY_PATH}"
-                    echo "Compile the code and generate any necessary artifacts"
+                    echo "Compiling the code and generating artifacts..."
                 }
             }
         }
@@ -26,8 +26,8 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    echo "Unit tests"
-                    echo "Integration tests"
+                    echo "Running Unit Tests..."
+                    echo "Running Integration Tests..."
                 }
             }
         }
@@ -35,7 +35,7 @@ pipeline {
         stage('Code Quality Check') {
             steps {
                 script {
-                    echo "Check the quality of the code"
+                    echo "Checking code quality..."
                 }
             }
         }
@@ -43,7 +43,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    echo "Deploy the application to the testing environment: ${TESTING_ENVIRONMENT}"
+                    echo "Deploying the application to the testing environment: ${TESTING_ENVIRONMENT}"
                 }
             }
         }
@@ -70,7 +70,7 @@ pipeline {
         always {
             script {
                 def buildStatus = currentBuild.currentResult
-                def buildUser = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]?.UserId ?: 'GItHub User'
+                def buildUser = currentBuild.getBuildCauses().find { it.className == 'hudson.model.Cause$UserIdCause' }?.userId ?: 'GitHub User'
 
                 emailext(
                     subject: "Pipeline ${buildStatus}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
