@@ -5,61 +5,57 @@ pipeline {
             steps {
                 git branch: 'main', url: 'https://github.com/seerat-00/Demo-pipeline.git'
             }
-        }
-
+        } 
+        
         stage('Build') {
             steps {
-                echo 'Building the application...'
-                bat 'echo Build process running...'  // Replace with actual build command
+                script {
+                    echo "Fetch the source code from the directory path: ${DIRECTORY_PATH}"
+                    echo "Compile the code and generate any necessary artifacts"
+                }
             }
         }
 
-        stage('Unit and Integration Tests') {
+        stage('Test') {
             steps {
-                echo 'Running Unit and Integration Tests...'
-                bat 'echo Running tests...'  // Replace with actual test command
+                script {
+                    echo "Unit tests"
+                    echo "Integration tests"
+                }
             }
         }
 
-        stage('Code Analysis') {
+        stage('Code Quality Check') {
             steps {
-                echo 'Performing Code Analysis...'
-                bat 'echo Code analysis in progress...'  // Replace with actual analysis command
+                script {
+                    echo "Check the quality of the code"
+                }
             }
         }
 
-        stage('Security Scan') {
+        stage('Deploy') {
             steps {
-                echo 'Performing Security Scan...'
-                bat 'echo Running security scan...'  // Replace with actual security scan command
+                script {
+                    echo "Deploy the application to the testing environment: ${TESTING_ENVIRONMENT}"
+                }
             }
         }
 
-        stage('Deploy to Staging') {
+        stage('Approval') {
             steps {
-                echo 'Deploying to Staging...'
-                bat 'echo Deploying to Staging environment...'  // Replace with actual deployment command
-            }
-        }
-
-        stage('Integration Tests on Staging') {
-            steps {
-                echo 'Running Integration Tests on Staging...'
-                bat 'echo Running staging tests...'  // Replace with actual test command
+                script {
+                    echo "Waiting for manual approval..."
+                    sleep 10
+                }
             }
         }
 
         stage('Deploy to Production') {
             steps {
-                echo 'Deploying to Production...'
-                bat 'echo Deploying to Production environment...'  // Replace with actual deployment command
+                script {
+                    echo "Deploying the application to the production environment: ${PRODUCTION_ENVIRONMENT}"
+                }
             }
-        }
-    }
-
-    post {
-        failure {
-            echo 'Pipeline failed. Check logs for errors.'
         }
     }
 }
