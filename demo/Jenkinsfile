@@ -4,7 +4,13 @@ pipeline {
     environment {
         DIRECTORY_PATH = 'C:/Users/DELL/Desktop/sem4/sit223'
         TESTING_ENVIRONMENT = 'staging'
-        PRODUCTION_ENVIRONMENT = 'Seerat'
+        PRODUCTION_ENVIRONMENT = 'production'
+        BUILD_TOOL = 'Maven'
+        TEST_TOOL = 'JUnit'
+        CODE_ANALYSIS_TOOL = 'SonarQube'
+        SECURITY_SCAN_TOOL = 'OWASP Dependency-Check'
+        STAGING_SERVER = 'AWS EC2 (staging)'
+        PRODUCTION_SERVER = 'AWS EC2 (production)'
     } 
     
     stages {
@@ -17,42 +23,54 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    echo "Fetch the source code from the directory path: ${DIRECTORY_PATH}"
-                    echo "Compile the code and generate any necessary artifacts"
+                    echo "Using ${BUILD_TOOL} to build and package the application"
+                    echo "Compiling the source code..."
+                    echo "Generating necessary artifacts..."
                 }
             }
         }
 
-        stage('Test') {
+        stage('Unit and Integration Tests') {
             steps {
                 script {
-                    echo "Unit tests"
-                    echo "Integration tests"
+                    echo "Running unit tests using ${TEST_TOOL}..."
+                    echo "Running integration tests..."
+                    echo "Ensuring all components work together as expected..."
                 }
             }
         }
 
-        stage('Code Quality Check') {
+        stage('Code Analysis') {
             steps {
                 script {
-                    echo "Check the quality of the code"
+                    echo "Performing code analysis using ${CODE_ANALYSIS_TOOL}..."
+                    echo "Ensuring code meets industry standards..."
                 }
             }
         }
 
-        stage('Deploy') {
+        stage('Security Scan') {
             steps {
                 script {
-                    echo "Deploy the application to the testing environment: ${TESTING_ENVIRONMENT}"
+                    echo "Performing security scan using ${SECURITY_SCAN_TOOL}..."
+                    echo "Identifying vulnerabilities in the code..."
                 }
             }
         }
 
-        stage('Approval') {
+        stage('Deploy to Staging') {
             steps {
                 script {
-                    echo "Waiting for manual approval..."
-                    sleep 10
+                    echo "Deploying the application to the staging environment: ${STAGING_SERVER}"
+                }
+            }
+        }
+
+        stage('Integration Tests on Staging') {
+            steps {
+                script {
+                    echo "Running integration tests on the staging environment..."
+                    echo "Verifying application behavior in a production-like setting..."
                 }
             }
         }
@@ -60,30 +78,29 @@ pipeline {
         stage('Deploy to Production') {
             steps {
                 script {
-                    echo "Deploying the application to the production environment: ${PRODUCTION_ENVIRONMENT}"
+                    echo "Deploying the application to the production environment: ${PRODUCTION_SERVER}"
                 }
             }
         }
     }
 
-    post{
-    always {
-        script{
-            def buildStatus = currentBuild.currentResult
-            def buildUser = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]?.UserId ?: 'GItHub User'
+    post {
+        always {
+            script {
+                def buildStatus = currentBuild.currentResult
+                def buildUser = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]?.UserId ?: 'GitHub User'
 
-            emailext(
-                subject: "Pipeline ${buildStatus}:  ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: """
-                This is a jenkins Pipeline Build status.
-                It has run properly.
-                Thank You
-            """,
-            to: 'iseeratsharmash@gmail.com',
-            from: 'iseeratsharmash@gmail.com',
-            replyTo: 'iseeratsharmash@gmail.com'
-            )
-        }
+                emailext(
+                    subject: "Pipeline ${buildStatus}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    body: """
+                    <p>This is a Jenkins Pipeline Build status.</p>
+                    <p>The pipeline has executed successfully.</p>
+                    """,
+                    to: 'iseeratsharmash@gmail.com',
+                    from: 'iseeratsharmash@gmail.com',
+                    replyTo: 'iseeratsharmash@gmail.com'
+                )
+            }
         }
     }
 }
