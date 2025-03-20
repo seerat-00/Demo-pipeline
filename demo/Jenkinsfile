@@ -88,10 +88,9 @@ pipeline {
         always {
             script {
                 def buildStatus = currentBuild.currentResult
-                def buildUser = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause')[0]?.UserId ?: 'GitHub User'
 
                 emailext(
-                    subject: "Pipeline ${buildStatus}: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    subject: "Pipeline ${buildStatus}",
                     body: """
                     This is a Jenkins Pipeline Build status.
                     It has run successfully.
